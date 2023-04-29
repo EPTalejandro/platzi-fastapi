@@ -56,10 +56,10 @@ def delete_movie(id: int):
     db.delete_data(id)
     return f"la pelicula {movie[0]['title']} con el id {id} a sido eliminada", db.data
 
-# @app.put('/update/{id}')
-# def update_movies(id:int, movie_to_update: dict = movies_parameter):
-#     movie = [movie for movie in db.data if movie['id'] == id]
-#     db.update_data(id, movie_to_update)
-#     return {'old_data':movie[0],
-#             'new_data':movie_to_update}
-# 
+@app.put('/update/{id}')
+def update_movies(id:int, movie_to_update: dict = movies_parameter):
+    movie = [movie for movie in db.data if movie['id'] == id]
+    db.update_data(id, movie_to_update)
+    return {'old_data':movie[0],
+            'new_data':movie_to_update}
+
