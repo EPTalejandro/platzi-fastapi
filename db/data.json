@@ -1,0 +1,31 @@
+[
+    {
+        "id": 1,
+        "title": "Avatar",
+        "overview": "En un exuberante planeta llamado Pandora viven los Na'vi, seres que ...",
+        "year": "2009",
+        "rating": 7.8,
+        "category": "acción"
+    },
+    {
+        "id": 2,
+        "tittle": "Los pinguinos de papa",
+        "category": "comedia"
+    },
+    {
+        "id": 3,
+        "title": "capitan america civil war",
+        "overview": "iron man siempre a tenido razon ",
+        "year": "2016",
+        "rating": 7.8,
+        "category": "acción"
+    },
+    {
+        "id": 4,
+        "title": "black panther",
+        "overview": "tachala es el mejor heroe de marvel",
+        "year": "2019",
+        "rating": 8.0,
+        "category": "ciencia ficción"
+    }
+]
