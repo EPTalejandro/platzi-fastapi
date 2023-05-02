@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Body
 from fastapi.responses import HTMLResponse
 import db
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from copy import deepcopy
+import datetime
 
 app=FastAPI()
 #al cambiar el atributo title de nuestro objeto 'FastAPI' se cambia el titulo de la documentacion
@@ -13,11 +14,23 @@ app.version = '0.0.1'
 
 class Movies(BaseModel):
     id:Optional[int] = None
-    title: str
-    overview: str
-    year: int
-    rating: float
+    title: str = Field(min_length=2, max_length=30)
+    overview: str = Field(min_length=50, max_length=200)
+    year: int = Field(le=datetime.date.today().year)
+    rating: float = Field(gt=0.00,le=10.00)
     category: str
+    
+    class Config():
+        schema_extra = {
+            "example":{
+                "id": 1,
+                "title": "Ingrese el nombre de la pelicula",
+                "overview": "descripcion de la pelicula en cuestion",
+                "year": 2000,
+                "rating": 5.0,
+                "category": "acción"
+            }
+        }
 
 #la ruta '/' vendria siendo la ruta raiz de nuestra api
 @app.get('/', tags=['home'])
