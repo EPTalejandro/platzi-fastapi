@@ -1,6 +1,9 @@
 from fastapi import FastAPI, Body
 from fastapi.responses import HTMLResponse
 import db
+from pydantic import BaseModel
+from typing import Optional
+from copy import deepcopy
 
 app=FastAPI()
 #al cambiar el atributo title de nuestro objeto 'FastAPI' se cambia el titulo de la documentacion
@@ -8,13 +11,13 @@ app.title = 'mi primera app'
 #el atributo version cambiar como se muestra esta puede tener utilidad combinado con GIT 
 app.version = '0.0.1'
 
-movies_parameter = {
-    "title": "str",
-    "overview": "str",
-    "year": 2000,
-    "rating": 1.1,
-    "category": "str",
-                    }
+class Movies(BaseModel):
+    id:Optional[int] = None
+    title: str
+    overview: str
+    year: int
+    rating: float
+    category: str
 
 #la ruta '/' vendria siendo la ruta raiz de nuestra api
 @app.get('/', tags=['home'])
@@ -38,13 +41,8 @@ def get_by_category(category: str):
     return movies if len(movies) > 0 else f'No hay peliculas de esa categoria {category}'
 
 @app.post('/movies', tags=['movies'])
-def add_movie(id: int = Body(),title: str = Body(),overview: str = Body(),year: str = Body(),rating: float = Body(),category: str = Body()):
-    new_movie = {"id": id,
-                 "title": title,
-                 "overview": overview,
-                 "year": year,
-                 "rating": rating,
-                 "category": category}
+def add_movie(movie: Movies):
+    new_movie = movie.dict()
     db.add_data(new_movie)
     return db.data
 
@@ -57,9 +55,11 @@ def delete_movie(id: int):
     return f"la pelicula {movie[0]['title']} con el id {id} a sido eliminada", db.data
 
 @app.put('/update/{id}')
-def update_movies(id:int, movie_to_update: dict = movies_parameter):
-    movie = [movie for movie in db.data if movie['id'] == id]
-    db.update_data(id, movie_to_update)
-    return {'old_data':movie[0],
+def update_movies(id:int, movie_to_update: Movies):
+    old_movie = [movie for movie in db.data if movie['id'] == id]
+    old_movie_copy = deepcopy(old_movie[0])
+    movie_to_update.id = id
+    db.update_data(id, movie_to_update.dict())
+    return {'old_data':old_movie_copy,
             'new_data':movie_to_update}
 
