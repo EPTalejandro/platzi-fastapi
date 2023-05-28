@@ -1,16 +1,21 @@
-from fastapi import FastAPI, Body
-from fastapi.responses import HTMLResponse
+from fastapi import Depends, FastAPI, Body, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 import db
 from pydantic import BaseModel, Field
 from typing import Optional
 from copy import deepcopy
-import datetime
+from jwt_manager import create_token, validate_token
+from fastapi.security import HTTPBearer
 
 app=FastAPI()
 #al cambiar el atributo title de nuestro objeto 'FastAPI' se cambia el titulo de la documentacion
 app.title = 'mi primera app'
 #el atributo version cambiar como se muestra esta puede tener utilidad combinado con GIT 
 app.version = '0.0.1'
+
+class User(BaseModel):
+    email: str
+    password: str
 
 class Movies(BaseModel):
     id:Optional[int] = None
@@ -32,14 +37,27 @@ class Movies(BaseModel):
             }
         }
 
+class JWTBearer(HTTPBearer):
+    async def __call__(self, request: Request):
+        auth = await super().__call__(request)
+        data = validate_token(auth.credentials)
+        if data["email"] != "admin@gmail.com":
+            raise HTTPException (status_code=403, detail='credenciales son invaldias ')
+        
 #la ruta '/' vendria siendo la ruta raiz de nuestra api
 @app.get('/', tags=['home'])
 def message():
     return "hola mundo"
 
-@app.get('/movies', tags=['movies'])
+@app.post('/login', tags=['auth'])
+def login(user: User):
+    if user.email == "admin@gmail.com" and user.password == "123456":
+        token: str = create_token(user.dict())
+        return JSONResponse (content=token)
+
+@app.get('/movies', tags=['movies'], dependencies=[Depends(JWTBearer)])
 def movies():
-    return db.data
+    return JSONResponse(status_code=200, content=db.data)
 
 @app.get('/movies/{id}', tags=['movies'])
 def get_movies(id: int):
